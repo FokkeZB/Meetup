@@ -16,13 +16,26 @@ $meetup = new Meetup(array(
 * Retrieve some events:
 
 ```php
-$events = $meetup->getEvents(array(
+$response = $meetup->getEvents(array(
 	'group_urlname' => 'YOUR-MEETUP-GROUP'
 ));
+
+// total number of items matching the get request
+$total_count = $response->meta_total_count;
+
+$events = $response->results;
+
 foreach ($events as $event) {
 	echo $event->name . ' at ' . date('Y-m-d H:i', $event->time / 1000) . PHP_EOL;
 }
 ```
+Many of the get requests will match more entries than the API will return in one request. A convenience method has been provided to return the next
+page of entries after you have performed a successful get request:
+
+$response = $meetup->getNext($response);
+
+$events = $response->results;
+...
 
 ## Constructing the client
 The class constructors takes one optional argument. This `(array)` will be stored in the object and used as default parameters for any request you make.
@@ -54,9 +67,11 @@ Feel free to fork the code and add more!
 |Client method        |API method                         |
 |---------------------|-----------------------------------|
 | getEvents           | /2/events                         |
+| getMembers          | /2/members                        |
 | getPhotos           | /2/photos                         |
 | getDiscussionBoards | /:urlname/boards                  |
 | getDiscussions      | /:urlname/boards/:bid/discussions |
+
 
 ## Roadmap
 * Implement `POST` and `DELETE` methods.

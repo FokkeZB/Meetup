@@ -26,6 +26,18 @@ class Meetup {
 	public function getDiscussions(array $parameters = array()) {
 		return $this->get('/:urlname/boards/:bid/discussions', $parameters);
 	}
+
+	public function getMembers(array $parameters = array()) {
+		return $this->get('/2/members', $parameters);
+	}
+
+	public function getNext($response) {
+		if (!isset($response) || !isset($response->meta->next))
+		{
+			throw new Exception("Invalid response object.");
+		}
+		return $this->get_url($response->meta->next);
+	}
 	
 	public function get($path, array $parameters = array()) {
 		$parameters = array_merge($this->_parameters, $parameters);
@@ -44,11 +56,18 @@ class Meetup {
 		}
 
 		$url = self::BASE . $path . '?' . http_build_query($parameters);
-		
+
+		return $this->get_url($url);
+	}
+
+	protected function get_url($url) {
+	
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, array("Accept-Charset: utf-8"));
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 		$content = curl_exec($ch);
 		
 		if (curl_errno($ch)) {
@@ -106,3 +125,4 @@ class Meetup {
 		return $response;
 	}
 }
+
