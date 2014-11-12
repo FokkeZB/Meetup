@@ -1,5 +1,5 @@
 # Meetup API
-This a very simple, one-file, PHP client for accessing most of the [Meetup API](http://www.meetup.com/meetup_api/).
+This a very simple, one-file, PHP client for accessing most of the [Meetup API](http://www.meetup.com/meetup_api/).  Some parameters are included behind the scenes so you don't have to using array_merge when the parameters have fixed values like signed or response_type depending on the nature of the request.
 
 ## Quick Start
 
