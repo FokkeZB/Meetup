@@ -21,7 +21,7 @@ try{
 ```php
 require 'meetup.php';
 $meetup = new Meetup(array(
-	'key' => 'YOUR_API_KEY'
+	'key' => '<api key>'
 ));
 
 $response = $meetup->getEvents(); //somewhat restricted
@@ -36,7 +36,7 @@ if( !isset($_GET['code']) )
     //authorize and go to URI w/ code
     $meetup = new Meetup();
     $meetup->authorize(
-	'client_id'     => '<client_id'>,
+	'client_id'     => '<client_id>',
 	'redirect_uri'  => '<redirect uri>'    	
     );
 }
