@@ -21,56 +21,40 @@ $response = $meetup->getEvents(); //somewhat restricted
 ```php
 if( !isset($_GET['code']) )
 {
-    try
-    {
-	    //authorize and go to URI w/ code
-	    $meetup = new Meetup();
-	    $meetup->authorize(
-		'client_id'     => '<client_id'>,
-		'redirect_uri'  => '<redirect uri>'    	
-	    );
-    }
-    catch(Exception $e)
-    {
-        //tell us what happened
-    	echo $e->getMessage();
-    	return;
-    }
+    //authorize and go to URI w/ code
+    $meetup = new Meetup();
+    $meetup->authorize(
+	'client_id'     => '<client_id'>,
+	'redirect_uri'  => '<redirect uri>'    	
+    );
 }
 else
 {
     //assuming we came back here...
-    try
-    {    
-        $meetup = new Meetup(
-    	    	array(
-    				"client_id"     => '<client id'>,
-    				"client_secret" => '<client secret>',
-    				"redirect_uri"  => '<redirect uri>',
-    				"code"          => $_GET['code']
-    		)
-        );
-
-        $response = $meetup->access();
-                	                
-        $accessToken  = $response->access_token;
-        $refreshToken = $response->refresh_token;
-        $expires      = time() + (intval($response->expires_in)-10);	//10 second buffer	        
-    }
-    catch(Exception $e)
-    {
-        //tell us what happened
-        echo $e->getMessage();
-        return;
-    } 
-    
+    $meetup = new Meetup(
+	        	array(
+	    			"client_id"     => '<client id'>,
+	    			"client_secret" => '<client secret>',
+	    			"redirect_uri"  => '<redirect uri>',
+	    			"code"          => $_GET['code']
+	    	)
+    );
+	
+    $response = $meetup->access();
+	        	                
     //now we can re-use this object for several requests
     $meetup = new Meetup(
     		array(
-    			"access_token"  => $accessToken,
+    			"access_token"  => $response->access_token,
     		)
      );
 
+     //store details for later in case we need to do requests elsewhere
+     //or refresh token
+     $_SESSION['access_token'] = $response->access_token;
+     $_SESSION['refresh_token'] = $response->refresh_token;
+     $_SESSION['expires'] = time() + intval($response->expires_in);
+     
      //get all groups for this member
      $response = $meetup->getGroups('member_id' => '<member id'>);
      
@@ -106,12 +90,9 @@ $events = $response->results;
 ## Constructing the client
 The class constructors takes one optional argument. This `(array)` will be stored in the object and used as default parameters for any request you make.
 
-I would suggest passing the `key` when you construct the client, but you could do just `$meetup = new Meetup;` and then pass the `key` parameter in every request you make.  These requests are somewhat restricted on the information passed back, you have to use OATH 2 for full access.
+I would suggest passing the `key` or `consumer details` when you construct the client, but you could do just `$meetup = new Meetup;` and then pass parameters in every request you make.  These requests are somewhat restricted on the information passed back, you have to use OATH 2 for full access otherwise you may not get back some information.
 
 Using OATH 2 there's additional steps required to get an access token and pass it on subsequent requests.  Your access token is only good for 1 hour and you'll have to refresh it if you plan on making subsequent calls to the service.
-
-## Constructing the client using OATH 
-
 
 ## Doing GET requests
 You can call any [Meetup API GET-method](http://www.meetup.com/meetup_api/docs/) using `get()`.
