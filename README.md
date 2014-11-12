@@ -1,17 +1,23 @@
 # Meetup API
 This a very simple, one-file, PHP client for accessing most of the [Meetup API](http://www.meetup.com/meetup_api/).  Some parameters are included behind the scenes so you don't have to using array_merge when the parameters have fixed values like signed or response_type depending on the nature of the request.
 
+#Exceptions
 Exceptions are thrown and can be caught when there's any errors interacting with the API, they are standard exceptions.
 
 ```php
-try{
+try
+{
    $meetup = new Meetup('<api key>');
    $meetup->getEvents();
-}catch(Exception $e)
+}
+catch(Exception $e)
 {
     echo $e->getMessage();
 }
 ```
+
+#Hardcoded parameters
+Underneath there's parameters (depending on the request being made) that get injected using array_merge because these values aren't variable they're fixed.  This way you don't have to know about them or worry about implementing them and if they're duplicated by you it won't matter.  You can just focus on including the core information and using the stub methods to handle the heavy lifting.
 
 ## Quick Start
 
@@ -36,8 +42,8 @@ if( !isset($_GET['code']) )
     //authorize and go back to URI w/ code
     $meetup = new Meetup();
     $meetup->authorize(
-	'client_id'     => '<consumer key>',
-	'redirect_uri'  => '<redirect uri>'    	
+		'client_id'     => '<consumer key>',
+		'redirect_uri'  => '<redirect uri>'    	
     );
 }
 else
