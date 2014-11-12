@@ -33,10 +33,10 @@ $response = $meetup->getEvents(); //somewhat restricted
 ```php
 if( !isset($_GET['code']) )
 {
-    //authorize and go to URI w/ code
+    //authorize and go back to URI w/ code
     $meetup = new Meetup();
     $meetup->authorize(
-	'client_id'     => '<client_id>',
+	'client_id'     => '<consumer key>',
 	'redirect_uri'  => '<redirect uri>'    	
     );
 }
@@ -44,34 +44,36 @@ else
 {
     //assuming we came back here...
     $meetup = new Meetup(
-	        	array(
-	    			"client_id"     => '<client id'>,
-	    			"client_secret" => '<client secret>',
-	    			"redirect_uri"  => '<redirect uri>',
-	    			"code"          => $_GET['code']
-	    	)
+        array(
+    		"client_id"     => '<consumer key>',
+    		"client_secret" => '<consumer secret>',
+    		"redirect_uri"  => '<redirect uri>',
+    		"code"          => $_GET['code'] //passed back to us from meetup
+    	)
     );
 	
+    //get an access token
     $response = $meetup->access();
 	        	                
-    //now we can re-use this object for several requests
+    //now we can re-use this object for several requests using our access
+    //token
     $meetup = new Meetup(
-    		array(
-    			"access_token"  => $response->access_token,
-    		)
+    	array(
+    		"access_token"  => $response->access_token,
+    	)
      );
 
      //store details for later in case we need to do requests elsewhere
      //or refresh token
      $_SESSION['access_token'] = $response->access_token;
      $_SESSION['refresh_token'] = $response->refresh_token;
-     $_SESSION['expires'] = time() + intval($response->expires_in);
+     $_SESSION['expires'] = time() + intval($response->expires_in); //use if >= intval($_SESSION['expires']) to check
      
      //get all groups for this member
-     $response = $meetup->getGroups('member_id' => '<member id'>);
+     $response = $meetup->getGroups('member_id' => '<member id>');
      
      //get all events for this member
-     $response = $meetup->getEvents('member_id' => '<member id'>);
+     $response = $meetup->getEvents('member_id' => '<member id>');
 }
 ```
 
@@ -85,14 +87,11 @@ $response = $meetup->getEvents(array(
 // total number of items matching the get request
 $total_count = $response->meta->total_count;
 
-$events = $response->results;
-
-foreach ($events as $event) {
+foreach ($response->results as $event) {
 	echo $event->name . ' at ' . date('Y-m-d H:i', $event->time / 1000) . PHP_EOL;
 }
 ```
-Many of the get requests will match more entries than the API will return in one request. A convenience method has been provided to return the next
-page of entries after you have performed a successful get request:
+Many of the get requests will match more entries than the API will return in one request. A convenience method has been provided to return the next page of entries after you have performed a successful get request:
 
 $response = $meetup->getNext($response);
 
@@ -104,13 +103,13 @@ The class constructors takes one optional argument. This `(array)` will be store
 
 I would suggest passing the `key` or `consumer details` when you construct the client, but you could do just `$meetup = new Meetup;` and then pass parameters in every request you make.  These requests are somewhat restricted on the information passed back, you have to use OATH 2 for full access otherwise you may not get back some information.
 
-Using OATH 2 there's additional steps required to get an access token and pass it on subsequent requests.  Your access token is only good for 1 hour and you'll have to refresh it if you plan on making subsequent calls to the service.
+Using OATH 2 there's additional steps required to get an access token and pass it on subsequent requests.  Your access token is only good for 1 hour and you'll have to refresh it if you plan on making subsequent calls to the service after that.
 
 ## Doing GET requests
-You can call any [Meetup API GET-method](http://www.meetup.com/meetup_api/docs/) using `get()`.
+You can call any [Meetup API GET-method](http://www.meetup.com/meetup_api/docs/) using `get()`.  There's several stub functions already for the more common ones and new ones will be added.
 
 ### Arguments
-The method takes two arguments, of which the second one is optional:
+The method get() takes two arguments, of which the second one is optional:
 
 1. `(string)` Meetup API method (e.g. `/2/events`)
 2. `(array)` Meetup API method paramaters (e.g. `array('group_urlname' => 'your-meetup-group')`)
@@ -142,7 +141,7 @@ Feel free to fork the code and add more!
 * Implement `POST` and `DELETE` methods.
 * Add more short-hands.
 * Have some meetups...
-* Modify/post using OATH 2
+* Modify/post using OATH 2 and write not just read
 
 ## Alternatives
 Before starting this client, I checked out the following [existing clients](http://www.meetup.com/meetup_api/clients/): 
