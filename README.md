@@ -11,6 +11,72 @@ require 'meetup.php';
 $meetup = new Meetup(array(
 	'key' => 'YOUR_API_KEY'
 ));
+
+$response = $meetup->getEvents(); //somewhat restricted
+```
+
+* Get your [Consumer details](https://secure.meetup.com/meetup_api/oauth_consumers/).
+* Require the library, create a Meetup object and set your consumer details and gain access:
+
+```php
+if( !isset($_GET['code']) )
+{
+    try
+    {
+	    //authorize and go to URI w/ code
+	    $meetup = new Meetup();
+	    $meetup->authorize(
+		'client_id'     => '<client_id'>,
+		'redirect_uri'  => '<redirect uri>'    	
+	    );
+    }
+    catch(Exception $e)
+    {
+        //tell us what happened
+    	echo $e->getMessage();
+    	return;
+    }
+}
+else
+{
+    //assuming we came back here...
+    try
+    {    
+        $meetup = new Meetup(
+    	    	array(
+    				"client_id"     => '<client id'>,
+    				"client_secret" => '<client secret>',
+    				"redirect_uri"  => '<redirect uri>',
+    				"code"          => $_GET['code']
+    		)
+        );
+
+        $response = $meetup->access();
+                	                
+        $accessToken  = $response->access_token;
+        $refreshToken = $response->refresh_token;
+        $expires      = time() + (intval($response->expires_in)-10);	//10 second buffer	        
+    }
+    catch(Exception $e)
+    {
+        //tell us what happened
+        echo $e->getMessage();
+        return;
+    } 
+    
+    //now we can re-use this object for several requests
+    $meetup = new Meetup(
+    		array(
+    			"access_token"  => $accessToken,
+    		)
+     );
+
+     //get all groups for this member
+     $response = $meetup->getGroups('member_id' => '<member id'>);
+     
+     //get all events for this member
+     $response = $meetup->getEvents('member_id' => '<member id'>);
+}
 ```
 
 * Retrieve some events:
@@ -21,7 +87,7 @@ $response = $meetup->getEvents(array(
 ));
 
 // total number of items matching the get request
-$total_count = $response->meta_total_count;
+$total_count = $response->meta->total_count;
 
 $events = $response->results;
 
@@ -40,7 +106,12 @@ $events = $response->results;
 ## Constructing the client
 The class constructors takes one optional argument. This `(array)` will be stored in the object and used as default parameters for any request you make.
 
-I would suggest passing the `key` when you construct the client, but you could do just `$meetup = new Meetup;` and then pass the `key` parameter in every request you make.
+I would suggest passing the `key` when you construct the client, but you could do just `$meetup = new Meetup;` and then pass the `key` parameter in every request you make.  These requests are somewhat restricted on the information passed back, you have to use OATH 2 for full access.
+
+Using OATH 2 there's additional steps required to get an access token and pass it on subsequent requests.  Your access token is only good for 1 hour and you'll have to refresh it if you plan on making subsequent calls to the service.
+
+## Constructing the client using OATH 
+
 
 ## Doing GET requests
 You can call any [Meetup API GET-method](http://www.meetup.com/meetup_api/docs/) using `get()`.
@@ -67,6 +138,7 @@ Feel free to fork the code and add more!
 |Client method        |API method                         |
 |---------------------|-----------------------------------|
 | getEvents           | /2/events                         |
+| getGroups           | /2/groups                         |
 | getMembers          | /2/members                        |
 | getPhotos           | /2/photos                         |
 | getDiscussionBoards | /:urlname/boards                  |
@@ -77,6 +149,7 @@ Feel free to fork the code and add more!
 * Implement `POST` and `DELETE` methods.
 * Add more short-hands.
 * Have some meetups...
+* Modify/post using OATH 2
 
 ## Alternatives
 Before starting this client, I checked out the following [existing clients](http://www.meetup.com/meetup_api/clients/): 
@@ -84,6 +157,7 @@ Before starting this client, I checked out the following [existing clients](http
 * [wizonesolutions/meetup_api](https://github.com/wizonesolutions/meetup_api): Huge library, hasn't been updated for 3 years.
 * [blobaugh](https://github.com/blobaugh/Meetup-API-client-for-PHP): Huge library, documentation quick start doesn't get you started.
 
+This is a more simplified library for access and interactions!
 ## License
 
 <pre>
