@@ -77,7 +77,7 @@ class Meetup
     
     public function authorize(array $parameters = array())
     {
-    	$location = self::AUTHORIZE . '?' . http_build_query(array_merge($this->_parameters,$parameters));
+    	$location = self::AUTHORIZE . '?' . http_build_query(array_merge($this->_parameters,$parameters, array('response_type' => 'code')));
     	header("Location: " . $location);
     }
     
