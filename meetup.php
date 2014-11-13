@@ -45,6 +45,11 @@ class Meetup
     * @var array
    */       
     protected $_parameters = array();
+  /**
+    * The response object from the request
+    * @var mixed
+   */           
+    protected $_response = null;
    /**
     * Constructor
     * @param array $parameters The parameters passed during construction
@@ -52,6 +57,7 @@ class Meetup
     public function __construct(array $parameters = array())
     {
         $this->_parameters = array_merge($this->_parameters, $parameters);
+        $this->_next = $this->_response = null;
     }
    /**
     * Stub for fetching events
@@ -123,17 +129,20 @@ class Meetup
     * Stub for grabbing the next response data if it's available in the meta information
     * of a response.  Normally if there's too many results it won't return them all.
     *
-    * @param mixed $response The response object given back from a previous request
     * @return mixed A json object containing response data
    */      
-    public function getNext($response)
+    public function getNext($all=false)
+    {   	
+    	return $this->hasNext() ? $this->api($this->_response->meta->next, array(), self::GET) : null;
+    }
+   /**
+    * Is there more data to retrieve?
+    *
+    * @return boolean True if there's more results to process
+   */     
+    public function hasNext()
     {
-        if (!isset($response) || !isset($response->meta->next))
-        {
-            //return null for easier processing
-            return null;
-        }
-        return $this->api($response->meta->next, array(), self::GET);
+    	return isset($this->_response->meta) && isset($this->_response->meta->next);
     }
    /**
     * Stub for updating an event
@@ -386,24 +395,24 @@ class Meetup
     		throw new Exception("Failed retrieving  '" . $url . "' because of connection issue: ' " . $error . "'.");
     	}
     	
-    	//retrieve json
-    	$response = json_decode($content);
-    	$status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    	//retrieve json and store it internally
+    	$this->_response = json_decode($content);
+    	$status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
    	
     	curl_close($ch);
     	    	
-    	if (!is_null($response) && $status != 200)
+    	if (!is_null($this->_response) && $status != 200)
     	{    	        
     		//tell them what went wrong or just relay the status
-    		if( isset($response->error) && isset($response->error_description) )
+    		if( isset($this->_response->error) && isset($this->_response->error_description) )
     		{
     			//what we see against Oath 
-    			$error = $response->error . ' - ' . $response->error_description;
+    			$error = $this->_response->error . ' - ' . $this->_response->error_description;
     		}
-    		else if( isset($response->details) && isset($response->problem) && isset($response->code) )
+    		else if( isset($this->_response->details) && isset($this->_response->problem) && isset($this->_response->code) )
     		{
     			//what we see against regular access
-    			$error = $response->code . ' - ' . $response->problem . ' - ' . $response->details;
+    			$error = $this->_response->code . ' - ' . $this->_response->problem . ' - ' . $this->_response->details;
     		}
     		else
     		{
@@ -412,7 +421,7 @@ class Meetup
     		 
     		throw new Exception("Failed retrieving  '" . $url . "' because of ' " . $error . "'.");
     	}	
-    	else if (is_null($response)) 
+    	else if (is_null($this->_response)) 
     	{
     		//did we have any parsing issues for the response?
     		switch (json_last_error()) 
@@ -442,8 +451,8 @@ class Meetup
     	
     		throw new Exception("Cannot read response by  '" . $url . "' because of: '" . $error . "'.");
     	}
-    	
-    	return $response;
+   	
+    	return $this->_response;
     }
 }
 ?>
