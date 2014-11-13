@@ -350,7 +350,7 @@ class Meetup
     			array_merge($params, array('token_type'=>'bearer'));
     		}
     		
-    		curl_setopt($ch, CURLOPT_URL, $url . '?' . http_build_query($params));
+    		curl_setopt($ch, CURLOPT_URL, $url . (!empty($params) ? ('?' . http_build_query($params)) : ''));
     	}	
     	else
     	{
