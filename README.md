@@ -128,10 +128,10 @@ $response = $meetup->refresh();
 ```
 
 ## Doing GET/POST/DELETE requests
-You can call any [Meetup API GET-method](http://www.meetup.com/meetup_api/docs/) using `get()`.  There's several stub functions already for the more common ones and new ones will be added.
+You can call any [Meetup API method](http://www.meetup.com/meetup_api/docs/) using `get()` or `post()` or `delete()` or `put()`.  There's several stub functions already for the more common ones and new ones will be added down the road.  You just have to supply the path relative from meetup (don't include the base path) and the parameters you want.  Use place holders in your path :<placeholder> and make sure to include the parameter in your parameters exactly as it appears in the placeholder.
 
 ### Arguments
-The method get() takes two arguments, of which the second one is optional:
+The method `get()`,`put()`,`post()`,`delete()` takes two arguments, of which the second one is optional:
 
 1. `(string)` Meetup API method (e.g. `/2/events`)
 2. `(array)` Meetup API method paramaters (e.g. `array('group_urlname' => 'your-meetup-group')`)
