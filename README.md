@@ -99,9 +99,11 @@ foreach ($response->results as $event) {
 ```
 Many of the get requests will match more entries than the API will return in one request. A convenience method has been provided to return the next page of entries after you have performed a successful get request:
 
+```php
 $response = $meetup->getNext($response);
 
 $events = $response->results;
+```
 ...
 
 ## Constructing the client
@@ -110,6 +112,16 @@ The class constructors takes one optional argument. This `(array)` will be store
 I would suggest passing the `key` or `consumer details` when you construct the client, but you could do just `$meetup = new Meetup;` and then pass parameters in every request you make.  These requests are somewhat restricted on the information passed back, you have to use OATH 2 for full access otherwise you may not get back some information.
 
 Using OATH 2 there's additional steps required to get an access token and pass it on subsequent requests.  Your access token is only good for 1 hour and you'll have to refresh it if you plan on making subsequent calls to the service after that.
+
+## What's OATH
+To keep it short and sweet it's a way to authenticate against the system and gain full privileged access, without it you don't have full access using only an API key.  You get consumer details from meetup, authorize yourself, meetup sends a code to your redirect uri, you read in the code and get an access token with it, using that access token you gain authenticated access to meetup.  You only have an hour but you can use your refresh token to get a new access token and repeat the process always using the newest access/refresh token you get back.
+
+```php
+$response = $meetup->refresh();
+
+//new details passed back
+//$response->access_token, $response->refresh_token, $response->expires_in
+```
 
 ## Doing GET requests
 You can call any [Meetup API GET-method](http://www.meetup.com/meetup_api/docs/) using `get()`.  There's several stub functions already for the more common ones and new ones will be added.
@@ -148,6 +160,8 @@ Feel free to fork the code and add more!
 * Add more short-hands.
 * Have some meetups...
 * Modify/post using OATH 2 and write not just read
+* Update Meetup object to be have member variables and store data internally for important information
+  like access tokens and etc.
 
 ## Alternatives
 Before starting this client, I checked out the following [existing clients](http://www.meetup.com/meetup_api/clients/): 
