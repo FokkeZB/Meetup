@@ -22,6 +22,7 @@ Underneath there's parameters (depending on the request being made) that get inj
 ## Quick Start
 
 * Get your [API key](http://www.meetup.com/meetup_api/key/).
+* Limited information returned on GET requests (ie may not get private event or member details unless authorized)
 * Require the library, create a Meetup object and set your key:
 
 ```php
@@ -34,6 +35,7 @@ $response = $meetup->getEvents(); //somewhat restricted
 ```
 
 * Get your [Consumer details](https://secure.meetup.com/meetup_api/oauth_consumers/).
+* Use authorized access to get ALL information on GET requests and perform POST/DELETE requests also
 * Require the library, create a Meetup object and set your consumer details and gain access:
 
 ```php
@@ -123,7 +125,7 @@ $response = $meetup->refresh();
 //$response->access_token, $response->refresh_token, $response->expires_in
 ```
 
-## Doing GET requests
+## Doing GET/POST/DELETE requests
 You can call any [Meetup API GET-method](http://www.meetup.com/meetup_api/docs/) using `get()`.  There's several stub functions already for the more common ones and new ones will be added.
 
 ### Arguments
@@ -153,23 +155,24 @@ Feel free to fork the code and add more!
 | getPhotos           | /2/photos                         |
 | getDiscussionBoards | /:urlname/boards                  |
 | getDiscussions      | /:urlname/boards/:bid/discussions |
-
+| postEvent           | /event/:id                        |
+| deleteEvent         | /event/:id                        |
 
 ## Roadmap
-* Implement `POST` and `DELETE` methods.
 * Add more short-hands.
 * Have some meetups...
-* Modify/post using OATH 2 and write not just read
 * Update Meetup object to be have member variables and store data internally for important information
-  like access tokens and etc.
+  like access tokens and etc. and don't just use arrays for everything
 
 ## Alternatives
 Before starting this client, I checked out the following [existing clients](http://www.meetup.com/meetup_api/clients/): 
 
 * [wizonesolutions/meetup_api](https://github.com/wizonesolutions/meetup_api): Huge library, hasn't been updated for 3 years.
 * [blobaugh](https://github.com/blobaugh/Meetup-API-client-for-PHP): Huge library, documentation quick start doesn't get you started.
+* [FokkeZB](https://github.com/FokkeZB/Meetup): Great simple library, missing OATH and post/delete.
+* 
+This is a more simplified library for access and interactions covering OATH and post/delete using the Meetup API!
 
-This is a more simplified library for access and interactions!
 ## License
 
 <pre>
