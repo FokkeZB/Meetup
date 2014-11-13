@@ -125,13 +125,13 @@ class Meetup
     *
     * @param mixed $response The response object given back from a previous request
     * @return mixed A json object containing response data
-    * @throws Exception if anything goes wrong
    */      
     public function getNext($response)
     {
         if (!isset($response) || !isset($response->meta->next))
         {
-            throw new Exception("Invalid response object.");
+            //return null for easier processing
+            return null;
         }
         return $this->api($response->meta->next, array(), self::GET);
     }
