@@ -97,16 +97,23 @@ $response = $meetup->getEvents(array(
 // total number of items matching the get request
 $total_count = $response->meta->total_count;
 
-foreach ($response->results as $event) {
+foreach ($response->results as $event) 
+{
 	echo $event->name . ' at ' . date('Y-m-d H:i', $event->time / 1000) . PHP_EOL;
 }
 ```
 Many of the get requests will match more entries than the API will return in one request. A convenience method has been provided to return the next page of entries after you have performed a successful get request:
 
 ```php
-$response = $meetup->getNext($response);
-
-$events = $response->results;
+//can check if there's more by using $response->hasNext(). Keep processing
+//events if they're available and make subsequent calls to the API
+while( ($response = $meetup->getNext()) !== null)	       	        
+{
+    foreach($response->results as $event)
+    {
+        //process event	            
+    }	
+}
 ```
 ...
 
