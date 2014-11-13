@@ -88,7 +88,7 @@ class Meetup
     
     public function refresh(array $parameters = array())
     {
-    	$this->api(self::ACCESS, array_merge($parameters, array('grant_type'=>'refresh_token')), true);
+    	return $this->api(self::ACCESS, array_merge($parameters, array('grant_type'=>'refresh_token')), true);
     }
     
     protected function api($url, $parameters, $post=false)
