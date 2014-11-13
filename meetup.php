@@ -1,69 +1,255 @@
 <?php
 /**
- * https://github.com/FokkeZB/Meetup
- * 
- * @notes Adjusted slightly and added post for OATH
+ * @package    Meetup
+ * @license    http://www.gnu.org/licenses/gpl.html GNU/GPL
  */
 class Meetup 
 {
+  /**
+    * Base meetup api url
+    * @const 
+   */		
     const BASE 		= 'https://api.meetup.com';
+  /**
+    * Base meetup api url
+    * @const 
+   */
     const AUTHORIZE = 'https://secure.meetup.com/oauth2/authorize';
+  /**
+    * ACCESS meetup api url
+    * @const 
+   */
     const ACCESS	= 'https://secure.meetup.com/oauth2/access';
-    
+  /**
+    * GET request
+    * @const 
+   */        
+    const GET    = 1;
+  /**
+    * POST request
+    * @const 
+   */    
+    const POST   = 2;
+  /**
+    * PUT request
+    * @const 
+   */    
+    const PUT    = 3;
+  /**
+    * DELETE request
+    * @const 
+   */    
+    const DELETE = 4;
+   /**
+    * Parameters for requests
+    * @var array
+   */       
     protected $_parameters = array();
-    
+   /**
+    * Constructor
+    * @param array $parameters The parameters passed during construction
+   */   
     public function __construct(array $parameters = array())
     {
         $this->_parameters = array_merge($this->_parameters, $parameters);
     }
-
+   /**
+    * Stub for fetching events
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+   */  
     public function getEvents(array $parameters = array()) 
     {
         return $this->get('/2/events', $parameters);
     }
-
+   /**
+    * Stub for fetching groups
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+   */  
     public function getGroups(array $parameters = array()) 
     {
         return $this->get('/2/groups', $parameters);
     }
-    
+    /**
+    * Stub for fetching photos
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+   */     
     public function getPhotos(array $parameters = array())
     {
         return $this->get('/2/photos', $parameters);
     }
-
+   /**
+    * Stub for fetching discussion boards
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+   */  
     public function getDiscussionBoards(array $parameters = array()) 
     {
         return $this->get('/:urlname/boards', $parameters);
     }
-
+   /**
+    * Stub for fetching discussions
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+   */  
     public function getDiscussions(array $parameters = array()) 
     {
         return $this->get('/:urlname/boards/:bid/discussions', $parameters);
     }
+    /**
+    * Stub for fetching member
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+   */     
     public function getMembers(array $parameters = array()) 
     {
         return $this->get('/2/members', $parameters);
     }
+   /**
+    * Stub for grabbing the next response data if it's available in the meta information
+    * of a response.  Normally if there's too many results it won't return them all.
+    *
+    * @param mixed $response The response object given back from a previous request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+   */      
     public function getNext($response)
     {
         if (!isset($response) || !isset($response->meta->next))
         {
             throw new Exception("Invalid response object.");
         }
-        return $this->api($response->meta->next);
+        return $this->api($response->meta->next, array(), self::GET);
     }
-
+   /**
+    * Stub for updating an event
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+   */   
+    public function postEvent(array $parameters = array())
+    {
+    	return $this->post('/2/event/:id', $parameters);
+    }
+   /**
+    * Stub for deleting an event
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+   */       
+    public function deleteEvent(array $parameters = array())
+    {
+    	return $this->delete('/2/event/:id', $parameters);
+    }   
+   /**
+    * Perform a get on any url supported by meetup, use : to specify parameters that use
+    * placeholders and pass that exact parameter name as a parameter.
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+    *
+    * @code 
+    * $meetup->get('/2/event/:id', array('id'=>10));
+    * $meetup->get('/2/members', array('group_urlname'=>'foobar'));
+    * @endcode
+   */            
     public function get($path, array $parameters = array())
     {    
-        if (preg_match_all('/:([a-z]+)/', $path, $matches))
+    	list($url, $params) = $this->params($path, $parameters);
+    	
+        return $this->api(self::BASE . $url, $params, self::GET);
+    }
+   /**
+    * Perform a post on any url supported by meetup, use : to specify parameters that use
+    * placeholders and pass that exact parameter name as a parameter.
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+    *
+    * @code 
+    * $meetup->post('/2/member/:id', array('id'=>10));
+    * @endcode
+   */                
+    public function post($path, array $parameters = array())
+    {
+     	list($url, $params) = $this->params($path, $parameters);
+    	
+        return $this->api(self::BASE . $url, $params, self::POST);   
+    }
+    /**
+    * Perform a put on any url supported by meetup, use : to specify parameters that use
+    * placeholders and pass that exact parameter name as a parameter.
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+    *
+    * @note There isn't any PUT supported events at the moment
+   */      
+    public function put($path, array $parameters = array())
+    {
+     	list($url, $params) = $this->params($path, $parameters);
+    	
+        return $this->api(self::BASE . $url, $params, self::PUT);       
+    }
+   /**
+    * Perform a delete on any url supported by meetup, use : to specify parameters that use
+    * placeholders and pass that exact parameter name as a parameter.
+    *
+    * @param array $parameters The parameters passed for this request
+    * @return mixed A json object containing response data
+    * @throws Exception if anything goes wrong
+    *
+    * @code 
+    * $meetup->delete('/2/member/:id', array('id'=>10));
+    * @endcode
+   */  
+    public function delete($path, array $parameters = array())
+    {
+     	list($url, $params) = $this->params($path, $parameters);
+    	
+        return $this->api(self::BASE . $url, $params, self::DELETE);       
+    }
+   /**
+    * Utility function for swapping place holders with parameters if any are found in 
+    * the request url.  The place holder parameter gets swapped out and the array gets
+    * the parameter removed, otherwise the request is left un-altered.
+    *
+    * @param string $path The relative path of the request from meetup (not including base path)
+    * @param array $parameters The parameters passed for this request
+    * @return array An array of the path and parameters modified or un-altered
+    * @throws Exception if anything goes wrong
+   */          
+    protected function params($path, array $parameters = array())
+    {
+    	$url    = $path;
+    	$params = $parameters;
+        if (preg_match_all('/:([a-z]+)/', $url, $matches))
         {           	
             foreach ($matches[0] as $i => $match)
             {                	
-                if (isset($parameters[$matches[1][$i]]))
+                if (isset($params[$matches[1][$i]]))
                 {
-                    $path = str_replace($match, $parameters[$matches[1][$i]], $path);
-                    unset($parameters[$matches[1][$i]]);
+                    $url = str_replace($match, $params[$matches[1][$i]], $url);
+                    unset($params[$matches[1][$i]]);
                 } 
                 else 
                 {
@@ -71,39 +257,70 @@ class Meetup
                 }
             }
         }
-
-        return $this->api(self::BASE . $path, $parameters, false);
-    }
-    
+        
+        return array($url, $params);    
+    }  
+   /**
+    * Utility function for authorizing ourselves with meetup.  Visit this url
+    * https://secure.meetup.com/meetup_api/oauth_consumers/ to learn about OATH and the 
+    * consumer details required for authorized access.
+    *
+    * @param array $parameters The parameters passed for this request
+    * @note You're sent to meetup and they will either have an error or a page requiring you to authorize, they'll send
+    *       you back to the redirect uri specified in your consumer details
+    * @note The parameter 'response_type' is automatically included with value 'code'
+   */       
     public function authorize(array $parameters = array())
-    {
-    	$location = self::AUTHORIZE . '?' . http_build_query(array_merge($this->_parameters,$parameters, array('response_type' => 'code')));
+    {   	
+    	$location = self::AUTHORIZE . '?' . http_build_query(array_merge($this->_parameters,$parameters, array('response_type'=>'code')));
     	header("Location: " . $location);
     }
-    
+   /**
+    * Utility function for getting an access token from meetup with the code they passed back in
+    * the authorization step.  Visit this url https://secure.meetup.com/meetup_api/oauth_consumers/ 
+    * to learn about OATH and the consumer details required for authorized access.
+    *
+    * @param array $parameters The parameters passed for this request
+    * @throws Exception if anything goes wrong
+    * @note The parameter 'grant_type' is automatically included with value 'authorization_code'
+   */      
     public function access(array $parameters = array())
     {
-    	return $this->api(self::ACCESS, array_merge($parameters, array('grant_type'=>'authorization_code')), true);
+    	return $this->api(self::ACCESS, array_merge($parameters, array('grant_type'=>'authorization_code')), self::POST);
     }
-    
+    /**
+    * Utility function for getting an refresh token from meetup to avoid authorization from expiring.  
+    * Visit this url https://secure.meetup.com/meetup_api/oauth_consumers/ to learn about OATH and the 
+    * consumer details required for authorized access.
+    *
+    * @param array $parameters The parameters passed for this request
+    * @throws Exception if anything goes wrong
+    * @note The parameter 'grant_type' is automatically included with value 'refresh_token'
+   */    
     public function refresh(array $parameters = array())
-    {
-    	return $this->api(self::ACCESS, array_merge($parameters, array('grant_type'=>'refresh_token')), true);
+    {    	
+    	return $this->api(self::ACCESS, array_merge($parameters, array('grant_type'=>'refresh_token')), self::POST);
     }
-    
-    protected function api($url, $parameters, $post=false)
+    /**
+    * Main routine that all requests go through which handles the CURL call to the server and
+    * prepares the request accordingly.
+    *
+    * @param array $parameters The parameters passed for this request
+    * @throws Exception if anything goes wrong
+    * @note The parameter 'sign' is automatically included with value 'true' if using an api key
+   */        
+    protected function api($url, $parameters, $action=self::GET)
     {
     	//merge parameters
-    	$this->_parameters = array_merge($parameters, $this->_parameters);
-    	
-    	
+    	$params = array_merge($parameters, $this->_parameters);
+    	   	
     	//make sure 'sign' is included when using api key only	
-	if(in_array('key', $this->_parameters) && $url!=self::ACCESS && $url!=self::AUTHORIZE)
+	if(in_array('key', $params) && $url!=self::ACCESS && $url!=self::AUTHORIZE)
     	{
     		//api request (any) - include sign parameters
-    		$this->_parameters = array_merge( array('sign', 'true'), $this->_parameters );
+    		$params = array_merge( array('sign', 'true'), $params );
     	}
-
+  	
     	//init curl
     	$ch = curl_init();
     	
@@ -118,33 +335,48 @@ class Meetup
     	curl_setopt($ch, CURLOPT_HEADER, false);
     	curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
     	
-    	//either GET or POST against api
-    	if($post===false)
+    	//either GET/POST/PUT/DELETE against api
+    	if($action==self::GET || $action==self::DELETE)
     	{   		
+    		//GET + DELETE
+    		
     		//include headers as specified by manual
     		if( $url == self::ACCESS )
     		{
     			array_push($headers, 'Content-Type: application/x-www-form-urlencoded');
     		}
-    		else if( strpos($url, self::BASE) === 0 && in_array('access_token', $this->_parameters) )
+    		else if( strpos($url, self::BASE) === 0 && in_array('access_token', $params) )
     		{
-    			array_merge($this->_parameters, array('token_type'=>'bearer'));
+    			array_merge($params, array('token_type'=>'bearer'));
     		}
     		
-    		curl_setopt($ch, CURLOPT_URL, $url . '?' . http_build_query($this->_parameters));
+    		curl_setopt($ch, CURLOPT_URL, $url . '?' . http_build_query($params));
     	}	
     	else
     	{
+    		//POST + PUT
+    		
     		curl_setopt($ch, CURLOPT_URL, $url);    		
-    		curl_setopt($ch, CURLOPT_POST, count($parameters));
-    		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($this->_parameters));   		
+    		curl_setopt($ch, CURLOPT_POST, count($params));
+    		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
     	}    	
-    	     	  	
+    	 
+    	//need custom types for PUT/DELETE
+    	switch($action)
+    	{
+    		case self::DELETE:
+    			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+    		break;
+    		case self::PUT:
+    			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+    		break;
+    	}
+    	    	  	
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
          
     	//fetch content
     	$content = curl_exec($ch);
-    	   	
+	    		    	   	
     	//was there an error on the connection?
     	if (curl_errno($ch))
     	{
@@ -159,7 +391,7 @@ class Meetup
     	$status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
    	
     	curl_close($ch);
-    	
+    	    	
     	if (!is_null($response) && $status != 200)
     	{    	        
     		//tell them what went wrong or just relay the status
@@ -215,4 +447,3 @@ class Meetup
     }
 }
 ?>
-
