@@ -131,7 +131,7 @@ class Meetup
     *
     * @return mixed A json object containing response data
    */      
-    public function getNext($all=false)
+    public function getNext()
     {   	
     	return $this->hasNext() ? $this->api($this->_response->meta->next, array(), self::GET) : null;
     }
@@ -142,7 +142,17 @@ class Meetup
    */     
     public function hasNext()
     {
-    	return isset($this->_response->meta) && isset($this->_response->meta->next);
+    	$next = null;
+    	if( isset($this->_response->meta) && isset($this->_response->meta->next) )
+    	{
+    		$next = $this->_response->meta->next;
+    		if( strlen($next) )
+    		{
+    			return true;
+    		}
+    	}
+    	
+    	return false;
     }
    /**
     * Stub for updating an event
