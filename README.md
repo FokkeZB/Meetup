@@ -1,7 +1,7 @@
 # Meetup API
 This a very simple, one-file, PHP client for accessing most of the [Meetup API](http://www.meetup.com/meetup_api/).  Some parameters are included behind the scenes so you don't have to using array_merge when the parameters have fixed values like signed or response_type depending on the nature of the request.
 
-The code is documented to include more information along with small code snippets in the documentation where applicable.
+The code is documented to include more information along with small code snippets in the documentation where applicable.  This library supports OATH, api key, get/put/delete calls, and has several useful stub methods for accessing API functionality from meetup.  There's documentation and comments in the code and a detailed README to help you get started easily using the library.
 
 #Exceptions
 Exceptions are thrown and can be caught when there's any errors interacting with the API, they are standard exceptions.
