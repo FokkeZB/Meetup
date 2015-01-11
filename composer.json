@@ -6,7 +6,7 @@
     "homepage": "https://github.com/user3581488/Meetup",
     "license": "Apache-2.0",
     "require": {
-        "php": ">=5.2.1"
+        "php": ">=5.3.3",
     },
     "autoload": {
         "classmap": [
