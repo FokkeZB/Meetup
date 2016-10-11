@@ -79,11 +79,11 @@ else
      $_SESSION['refresh_token'] = $response->refresh_token;
      $_SESSION['expires'] = time() + intval($response->expires_in); //use if >= intval($_SESSION['expires']) to check
      
-     //get all groups for this member
-     $response = $meetup->getGroups('member_id' => '<member id>');
+     //get all groups for this member, to get your own use array('member_id' => 'self')
+     $response = $meetup->getGroups(array('member_id' => '<member id>'));
      
-     //get all events for this member
-     $response = $meetup->getEvents('member_id' => '<member id>');
+     //get all events for this member, to get your own use array('member_id' => 'self')
+     $response = $meetup->getEvents(array('member_id' => '<member id>'));
 }
 ```
 
