@@ -154,6 +154,17 @@ class Meetup
     	
     	return false;
     }
+    /**
+     * Stub for adding an event
+     *
+     * @param array $parameters The parameters passed for this request
+     * @return mixed A json object containing response data
+     * @throws Exception if anything goes wrong
+    */   
+     public function postEvent(array $parameters = array())
+     {
+     	return $this->post('/2/event', $parameters);
+     }
    /**
     * Stub for updating an event
     *
@@ -161,7 +172,7 @@ class Meetup
     * @return mixed A json object containing response data
     * @throws Exception if anything goes wrong
    */   
-    public function postEvent(array $parameters = array())
+    public function updateEvent(array $parameters = array())
     {
     	return $this->post('/2/event/:id', $parameters);
     }
@@ -411,7 +422,7 @@ class Meetup
    	
     	curl_close($ch);
     	    	
-    	if (!is_null($this->_response) && $status != 200)
+    	if (!is_null($this->_response) && ($status < 200 || $status >= 300))
     	{    	        
     		//tell them what went wrong or just relay the status
     		if( isset($this->_response->error) && isset($this->_response->error_description) )
