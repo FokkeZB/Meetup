@@ -1,0 +1,21 @@
+{
+    "name": "user3581488/Meetup",
+    "type": "library",
+    "description": "PHP client for accessing most of the Meetup API",
+    "keywords": ["meetup"],
+    "homepage": "https://github.com/user3581488/Meetup",
+    "license": "Apache-2.0",
+    "require": {
+        "php": ">=5.3.3"
+    },
+    "autoload": {
+        "classmap": [
+            "/"
+        ]
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0"
+        }
+    }
+}
